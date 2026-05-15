@@ -880,9 +880,15 @@
     const now = Date.now();
     const tStart = now - 12 * 3600 * 1000;
     const tEnd   = now + 12 * 3600 * 1000;
+    // Include curve points AND extremes (HW/LW) in the Y range so dots aren't clipped
     const heights = curve.map(p => p.h);
-    const hMin = Math.min.apply(null, heights) - 0.2;
-    const hMax = Math.max.apply(null, heights) + 0.2;
+    if (tide.extremes) {
+      for (const e of tide.extremes) {
+        if (e.t >= tStart && e.t <= tEnd) heights.push(e.h);
+      }
+    }
+    const hMin = Math.min.apply(null, heights) - 0.3;
+    const hMax = Math.max.apply(null, heights) + 0.3;
     const xFor = t => padL + (t - tStart) / (tEnd - tStart) * innerW;
     const yFor = h => padT + (1 - (h - hMin) / (hMax - hMin)) * innerH;
 
