@@ -453,8 +453,8 @@ body {
 /* ----------------------------------------------------------------------------
    FORECAST SECTION  — single row, hours then days
    ---------------------------------------------------------------------------- */
-.hourly-section { display: block; min-height: 0; }
-.hourly-section .card { padding: 10px 16px; gap: 8px; min-height: 0; }
+.hourly-section { display: flex; flex-direction: column; min-height: 0; }
+.hourly-section .card { padding: 10px 16px; gap: 8px; min-height: 0; flex: 1; }
 
 .forecast-head {
   display: flex;
