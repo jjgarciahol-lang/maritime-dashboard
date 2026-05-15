@@ -109,6 +109,21 @@
     return { n: 12, name: 'Hurricane' };
   }
 
+  // Douglas Sea State scale (0-9) based on significant wave height in metres.
+  // Official WMO scale used by maritime services.
+  function douglasSeaState(m) {
+    if (m == null || isNaN(m)) return { n: null, name: '—' };
+    if (m < 0.1)  return { n: 0, name: 'Calm' };
+    if (m < 0.5)  return { n: 2, name: 'Smooth' };
+    if (m < 1.25) return { n: 3, name: 'Slight' };
+    if (m < 2.5)  return { n: 4, name: 'Moderate' };
+    if (m < 4)    return { n: 5, name: 'Rough' };
+    if (m < 6)    return { n: 6, name: 'Very rough' };
+    if (m < 9)    return { n: 7, name: 'High' };
+    if (m < 14)   return { n: 8, name: 'Very high' };
+    return { n: 9, name: 'Phenomenal' };
+  }
+
   const WMO_TEXT = {
     0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
     45: 'Fog', 48: 'Depositing rime fog',
@@ -729,8 +744,19 @@
     $('swellPeriod').textContent = (c.swell_wave_period != null) ? c.swell_wave_period.toFixed(1) + ' s' : '—';
     $('sst').textContent         = (c.sea_surface_temperature != null) ? c.sea_surface_temperature.toFixed(1) + ' °C' : '—';
 
-    const seaEl = $('seaCard');
+    // Douglas sea state badge
     const w = c.wave_height;
+    const badge = $('seaStateBadge');
+    if (badge) {
+      const ds = douglasSeaState(w);
+      badge.textContent = (ds.n != null) ? ds.n + ' · ' + ds.name : '';
+      badge.className = 'sea-state-badge';
+      if (ds.n != null) badge.classList.add('lvl-' + ds.n);
+    }
+
+    renderSeaSpark();
+
+    const seaEl = $('seaCard');
     seaEl.classList.remove('lvl-green', 'lvl-yellow', 'lvl-orange', 'lvl-red');
     if (w != null) {
       const t = C.colorThresholds.wave;
@@ -741,6 +767,57 @@
     }
     seaEl.classList.toggle('alert', w != null && w > C.alerts.waveHeightM);
     if (!stale) seaEl.classList.remove('stale');
+  }
+
+  // Sparkline of wave height for the next 12 h. Reads from marine hourly cache.
+  function renderSeaSpark() {
+    const svg = $('seaSpark');
+    if (!svg) return;
+    const mh = STATE.lastMarineHourly;
+    if (!mh || !mh.time || !mh.wave_height) { svg.innerHTML = ''; return; }
+    const now = Date.now();
+    const data = [];
+    for (let i = 0; i < mh.time.length; i++) {
+      const t = new Date(mh.time[i]).getTime();
+      if (t >= now - 30 * 60 * 1000 && t <= now + 12 * 3600 * 1000) {
+        const h = mh.wave_height[i];
+        if (h != null && !isNaN(h)) data.push({ t, h });
+      }
+    }
+    if (data.length < 2) { svg.innerHTML = ''; return; }
+
+    const W = 300, H = 50, padX = 4, padY = 6;
+    const innerW = W - 2 * padX;
+    const innerH = H - 2 * padY;
+    const heights = data.map(d => d.h);
+    const minH = Math.min.apply(null, heights);
+    const maxH = Math.max.apply(null, heights);
+    const range = Math.max(0.4, maxH - minH);
+    const baseMin = minH - (range * 0.05);
+    const xFor = i => padX + (i / (data.length - 1)) * innerW;
+    const yFor = h => padY + (1 - (h - baseMin) / (range * 1.1)) * innerH;
+
+    let path = '';
+    data.forEach((p, i) => {
+      path += (i ? 'L' : 'M') + xFor(i).toFixed(1) + ' ' + yFor(p.h).toFixed(1) + ' ';
+    });
+    const fillPath = path +
+                     'L' + xFor(data.length - 1).toFixed(1) + ' ' + (padY + innerH) +
+                     ' L' + xFor(0).toFixed(1) + ' ' + (padY + innerH) + ' Z';
+
+    let html = '<path d="' + fillPath + '" fill="rgba(56,189,248,0.18)"/>';
+    html += '<path d="' + path + '" fill="none" stroke="#38BDF8" stroke-width="1.5"/>';
+    // current point
+    html += '<circle cx="' + xFor(0).toFixed(1) + '" cy="' + yFor(data[0].h).toFixed(1) +
+            '" r="2.5" fill="#FACC15"/>';
+    // min/max labels
+    html += '<text x="' + (W - 4) + '" y="' + (padY + 8) +
+            '" text-anchor="end" fill="#7C8A9D" font-size="9" font-family="-apple-system,system-ui,sans-serif">' +
+            maxH.toFixed(1) + 'm</text>';
+    html += '<text x="' + (W - 4) + '" y="' + (padY + innerH) +
+            '" text-anchor="end" fill="#7C8A9D" font-size="9" font-family="-apple-system,system-ui,sans-serif">' +
+            minH.toFixed(1) + 'm</text>';
+    svg.innerHTML = html;
   }
 
   // --------------------------------------------------------------------------
