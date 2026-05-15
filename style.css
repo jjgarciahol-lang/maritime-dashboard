@@ -458,50 +458,45 @@ body {
 .sea-period { margin-left: auto; }
 .mini-compass { width: 28px; height: 28px; flex-shrink: 0; }
 
-/* Douglas sea state badge */
-.sea-state-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  margin-left: 12px;
-  border-radius: 12px;
+/* Douglas sea-state visual legend (mirrors the Beaufort row in the footer) */
+.sea-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sea-scale .ftr-label {
+  color: var(--ink-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-weight: 700;
+}
+.sea-scale .ftr-label > span {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  margin-left: 6px;
+}
+.ds-row { display: flex; gap: 3px; }
+.ds-cell {
+  flex: 1;
+  height: 22px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  border: 1px solid transparent;
+  color: #0E1622;
   font-variant-numeric: tabular-nums;
+  border-radius: 2px;
 }
-.sea-state-badge:empty { display: none; }
-.sea-state-badge.lvl-0,
-.sea-state-badge.lvl-1,
-.sea-state-badge.lvl-2 { background: rgba(74, 222, 128, 0.14); color: var(--safe);    border-color: rgba(74, 222, 128, 0.40); }
-.sea-state-badge.lvl-3,
-.sea-state-badge.lvl-4 { background: rgba(250, 204, 21, 0.14); color: var(--caution); border-color: rgba(250, 204, 21, 0.40); }
-.sea-state-badge.lvl-5 { background: rgba(251, 146, 60, 0.18); color: var(--warning); border-color: rgba(251, 146, 60, 0.50); }
-.sea-state-badge.lvl-6,
-.sea-state-badge.lvl-7,
-.sea-state-badge.lvl-8,
-.sea-state-badge.lvl-9 { background: rgba(239, 68, 68, 0.18);  color: var(--danger);  border-color: rgba(239, 68, 68, 0.50); }
-
-/* Sparkline at the bottom of the sea-state card */
-.sea-spark-wrap {
-  margin-top: auto;          /* pushes the sparkline to the bottom of the flex card */
-  padding-top: 6px;
-  border-top: 1px solid var(--border-soft);
-  flex-shrink: 0;
-}
-.sea-spark-label {
-  font-size: 10px;
-  color: var(--ink-dim);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-  font-weight: 700;
-}
-.sea-spark {
-  width: 100%;
-  height: 46px;
-  display: block;
+.ds-cell.current {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+  z-index: 1;
+  position: relative;
 }
 
 /* ----------------------------------------------------------------------------

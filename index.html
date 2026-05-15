@@ -114,13 +114,28 @@
         <span class="big-num" id="waveHeight">—</span>
         <span class="unit">m</span>
         <span class="feels">significant wave</span>
-        <span class="sea-state-badge" id="seaStateBadge"></span>
+      </div>
+
+      <!-- Douglas sea-state visual scale (0-9): same idea as the Beaufort row -->
+      <div class="sea-scale">
+        <div class="ftr-label">Sea state · now <span id="douglasCurrent">—</span></div>
+        <div class="ds-row" id="douglasLegend"></div>
       </div>
 
       <div class="sea-dir">
         <svg id="waveDirCompass" class="mini-compass" viewBox="0 0 40 40" aria-hidden="true"></svg>
         <span class="sea-dir-text">from <span id="waveDir">—</span></span>
-        <span class="sea-period">period <span id="wavePeriod">—</span></span>
+      </div>
+
+      <div class="row">
+        <div class="cell">
+          <div class="cell-label">Wave period</div>
+          <div class="cell-value" id="wavePeriod">—</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Sea temp</div>
+          <div class="cell-value" id="sst">—</div>
+        </div>
       </div>
 
       <div class="row">
@@ -132,15 +147,6 @@
           <div class="cell-label">Swell period</div>
           <div class="cell-value" id="swellPeriod">—</div>
         </div>
-        <div class="cell">
-          <div class="cell-label">Sea temp</div>
-          <div class="cell-value" id="sst">—</div>
-        </div>
-      </div>
-
-      <div class="sea-spark-wrap">
-        <div class="sea-spark-label">Wave height · next 12 h</div>
-        <svg id="seaSpark" class="sea-spark" viewBox="0 0 300 50" preserveAspectRatio="none" aria-hidden="true"></svg>
       </div>
     </section>
 
