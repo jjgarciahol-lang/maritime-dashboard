@@ -458,6 +458,10 @@ body {
 .sea-period { margin-left: auto; }
 .mini-compass { width: 28px; height: 28px; flex-shrink: 0; }
 
+/* Sea State card is denser than the others — tighter gaps */
+#seaCard { gap: 10px; padding-bottom: 14px; }
+#seaCard .row { gap: 8px; }
+
 /* Douglas sea-state visual legend (mirrors the Beaufort row in the footer) */
 .sea-scale {
   display: flex;
