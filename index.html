@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maritime Rescue — Carrickfinn Station</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-title" id="stationLabel">MARITIME RESCUE — CARRICKFINN STATION</div>
+      <div class="hdr-coords" id="stationCoords">—</div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-clock" id="clock">--:--:--</div>
+      <div class="hdr-date" id="dateText">—</div>
+      <div class="hdr-updated">Updated <span id="lastUpdated">—</span></div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">☾</button>
+  </header>
+
+  <!-- BANNERS -->
+  <div id="offlineBanner" class="offline-banner hidden">
+    NO NETWORK · DISPLAYING LAST CACHED READING
+  </div>
+
+  <div id="warningBanner" class="warning-banner hidden" aria-live="polite">
+    <span class="warn-tag">MET ÉIREANN</span>
+    <div class="warning-scroll"><span id="warningText"></span></div>
+  </div>
+
+  <!-- MAIN 3-COLUMN GRID -->
+  <main class="main-grid">
+
+    <!-- ATMOSPHERIC -->
+    <section class="card" id="atmoCard">
+      <div class="card-title">
+        <span>ATMOSPHERIC</span>
+      </div>
+
+      <div class="atmo-temp">
+        <span class="big-num" id="temp">—</span>
+        <span class="unit">°C</span>
+        <span class="feels">feels like <span id="feels">—</span>°</span>
+      </div>
+
+      <div class="atmo-sky">
+        <div id="skyIcon" class="sky-icon" aria-hidden="true"></div>
+        <div id="skyText" class="sky-text">—</div>
+      </div>
+
+      <div class="row">
+        <div class="cell">
+          <div class="cell-label">Humidity</div>
+          <div class="cell-value" id="humidity">—</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Precipitation</div>
+          <div class="cell-value" id="precip">—</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cell" id="visCallout">
+          <div class="cell-label">Visibility <span class="vc-state" id="visState"></span></div>
+          <div class="cell-value" id="visibility">—</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Pressure · 3h</div>
+          <div class="cell-value">
+            <span id="pressureValue">—</span>
+            <span id="pressureTrend" class="trend"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WIND -->
+    <section class="card" id="windCard">
+      <div class="card-title">
+        <span>WIND</span>
+      </div>
+
+      <div class="wind-body">
+        <div class="wind-rose-wrap">
+          <svg id="windRose" class="wind-rose" viewBox="0 0 200 200" aria-hidden="true"></svg>
+        </div>
+        <div class="wind-readout">
+          <div class="wind-big">
+            <span class="big-num" id="windSpeed">—</span>
+            <span class="unit">km/h</span>
+          </div>
+          <div class="wind-knots" id="windKnots"></div>
+          <div class="wind-dir" id="windDir">—</div>
+
+          <div class="wind-stats">
+            <div class="ws-row"><span class="ws-k">Gust</span><span class="ws-v" id="windGust">—</span></div>
+            <div class="ws-row"><span class="ws-k">Beaufort</span><span class="ws-v" id="beaufortBadge">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEA STATE -->
+    <section class="card" id="seaCard">
+      <div class="card-title">
+        <span>SEA STATE</span>
+      </div>
+
+      <div class="sea-big">
+        <span class="big-num" id="waveHeight">—</span>
+        <span class="unit">m</span>
+        <span class="feels">significant wave</span>
+      </div>
+
+      <div class="sea-dir">
+        <svg id="waveDirCompass" class="mini-compass" viewBox="0 0 40 40" aria-hidden="true"></svg>
+        <span class="sea-dir-text">from <span id="waveDir">—</span></span>
+        <span class="sea-period">period <span id="wavePeriod">—</span></span>
+      </div>
+
+      <div class="row">
+        <div class="cell">
+          <div class="cell-label">Swell height</div>
+          <div class="cell-value" id="swellHeight">—</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Swell period</div>
+          <div class="cell-value" id="swellPeriod">—</div>
+        </div>
+        <div class="cell">
+          <div class="cell-label">Sea temp</div>
+          <div class="cell-value" id="sst">—</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FORECAST: split into NEXT 12 HOURS and NEXT 6 DAYS -->
+  <section class="hourly-section">
+    <div class="card" id="hourlyCard">
+      <div class="forecast-row">
+        <div class="forecast-section" id="forecastHourlySection">
+          <div class="forecast-head"><span class="fh-title">NEXT 12 HOURS</span></div>
+          <div class="forecast-cells" id="forecastHourly"></div>
+        </div>
+        <div class="forecast-divider" aria-hidden="true"></div>
+        <div class="forecast-section" id="forecastDailySection">
+          <div class="forecast-head"><span class="fh-title">NEXT 6 DAYS</span></div>
+          <div class="forecast-cells" id="forecastDaily"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIDES -->
+  <section class="tides-section">
+    <div class="card" id="tideCard">
+      <div class="card-title">
+        <span>TIDES · ±12 H</span>
+        <span class="src-badge" id="tideSource"></span>
+      </div>
+      <!-- (tideSource kept for harmonic/stormglass label; not an Open‑Meteo brand) -->
+      <div class="tide-wrap">
+        <svg id="tideChart" class="tide-chart" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="tide-table" id="tideTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="ftr">
+    <div class="ftr-block">
+      <div id="sunriseIcon" class="ftr-icon"></div>
+      <div>
+        <div class="ftr-label">Sunrise</div>
+        <div class="ftr-value" id="sunrise">—</div>
+      </div>
+    </div>
+
+    <div class="ftr-block">
+      <div id="sunsetIcon" class="ftr-icon"></div>
+      <div>
+        <div class="ftr-label">Sunset</div>
+        <div class="ftr-value" id="sunset">—</div>
+      </div>
+    </div>
+
+    <div class="ftr-block">
+      <div>
+        <div class="ftr-label">Daylight remaining</div>
+        <div class="ftr-value" id="daylightRemaining">—</div>
+      </div>
+    </div>
+
+    <div class="ftr-block">
+      <div id="moonIcon" class="moon-icon"></div>
+      <div>
+        <div class="ftr-label">Moon</div>
+        <div class="ftr-value" id="moonPhase">—</div>
+      </div>
+    </div>
+
+    <div class="ftr-block beaufort-legend">
+      <div>
+        <div class="ftr-label">Beaufort · now <span id="bfCurrent">—</span></div>
+        <div class="bf-row" id="bfLegend"></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

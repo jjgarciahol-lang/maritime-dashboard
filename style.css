@@ -1,0 +1,704 @@
+/* ============================================================================
+   Maritime Rescue Dashboard — Carrickfinn Station
+   Target: 1920×1080 horizontal, no-scroll, kiosk.
+   System fonts only (no web fonts) for offline reliability.
+   ============================================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #0B131D;
+  --panel:        #131C28;
+  --panel-2:      #17212F;
+  --cell:         rgba(255, 255, 255, 0.025);
+  --ink:          #ECEFF4;
+  --ink-dim:      #7C8A9D;
+  --ink-faint:    #4F5C70;
+  --border:       #1E2A3C;
+  --border-soft:  #18222F;
+
+  --safe:    #4ADE80;
+  --caution: #FACC15;
+  --warning: #FB923C;
+  --danger:  #EF4444;
+  --info:    #38BDF8;
+
+  --safe-bg:    rgba(74, 222, 128, 0.10);
+  --caution-bg: rgba(250, 204, 21, 0.10);
+  --warning-bg: rgba(251, 146, 60, 0.10);
+  --danger-bg:  rgba(239, 68, 68, 0.12);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+               Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+body.theme-light {
+  --bg:           #F1F3F7;
+  --panel:        #FFFFFF;
+  --panel-2:      #F7F9FB;
+  --cell:         rgba(0, 0, 0, 0.025);
+  --ink:          #0B131D;
+  --ink-dim:      #56657A;
+  --ink-faint:    #94A0B2;
+  --border:       #DDE3EC;
+  --border-soft:  #E8EBF1;
+}
+
+html, body { height: 100%; width: 100%; }
+html { overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.3;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto auto;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  padding: 10px;
+  gap: 10px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ----------------------------------------------------------------------------
+   HEADER
+   ---------------------------------------------------------------------------- */
+.hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 22px;
+  position: relative;
+  height: 92px;
+}
+
+.hdr-title {
+  font-size: clamp(18px, 1.55vw, 26px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hdr-coords {
+  color: var(--ink-dim);
+  font-size: clamp(12px, 0.85vw, 14px);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.hdr-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+
+.hdr-clock {
+  font-size: clamp(30px, 2.6vw, 42px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  font-family: var(--font-mono);
+}
+
+.hdr-date {
+  color: var(--ink-dim);
+  font-size: clamp(12px, 0.9vw, 14px);
+  margin-top: 6px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.hdr-updated {
+  font-size: 11px;
+  color: var(--ink-dim);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+.hdr-updated.stale { color: var(--caution); }
+.hdr-updated.stale::before { content: '⚠ '; }
+
+.theme-toggle {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--ink-dim); }
+
+/* ----------------------------------------------------------------------------
+   BANNERS
+   ---------------------------------------------------------------------------- */
+.offline-banner {
+  /* hidden by design — offline state is communicated by the orange triangle
+     in the header's "Updated …" stamp instead of a screen-wide red bar */
+  display: none !important;
+}
+.warning-banner.hidden { display: none; }
+
+.warning-banner {
+  background: var(--caution-bg);
+  color: var(--caution);
+  border: 1px solid var(--caution);
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.1vw, 17px);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.warning-banner.sev-yellow { color: var(--caution); border-color: var(--caution); background: var(--caution-bg); }
+.warning-banner.sev-orange { color: var(--warning); border-color: var(--warning); background: var(--warning-bg); }
+.warning-banner.sev-red    { background: var(--danger); border-color: var(--danger); color: #fff; }
+.warn-tag {
+  background: var(--caution);
+  color: #0B131D;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  flex-shrink: 0;
+}
+.warning-banner.sev-orange .warn-tag { background: var(--warning); }
+.warning-banner.sev-red .warn-tag { background: #fff; color: var(--danger); }
+.warning-scroll { flex: 1; white-space: nowrap; overflow: hidden; }
+.warning-banner.scrolling .warning-scroll > span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 40s linear infinite;
+}
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ----------------------------------------------------------------------------
+   MAIN GRID — three cards
+   ---------------------------------------------------------------------------- */
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  border-left: 3px solid var(--border-soft);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  transition: border-left-color 0.3s;
+}
+
+.card.lvl-green  { border-left-color: var(--safe); }
+.card.lvl-yellow { border-left-color: var(--caution); }
+.card.lvl-orange { border-left-color: var(--warning); }
+.card.lvl-red    { border-left-color: var(--danger); }
+
+.card.stale { opacity: 0.55; }
+
+.card.alert {
+  animation: pulseAlert 2.6s ease-in-out infinite;
+}
+@keyframes pulseAlert {
+  0%, 100% { box-shadow: inset 0 0 0 1px var(--border); }
+  50%      { box-shadow: inset 0 0 0 2px var(--danger); }
+}
+
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.src-badge {
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  text-transform: none;
+}
+.src-badge.fallback { color: var(--warning); }
+.src-badge.cache    { color: var(--danger); }
+.hourly-cols {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+.big-num {
+  font-size: clamp(40px, 4vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-family: var(--font-mono);
+}
+
+.unit {
+  font-size: clamp(14px, 1.1vw, 18px);
+  color: var(--ink-dim);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* ----------------------------------------------------------------------------
+   Cells (sub-stats) — used in rows
+   ---------------------------------------------------------------------------- */
+.row { display: flex; gap: 8px; flex-shrink: 0; }
+.cell {
+  flex: 1;
+  background: var(--cell);
+  padding: 8px 12px;
+  border-radius: 3px;
+  min-width: 0;
+}
+.cell-label {
+  color: var(--ink-dim);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.cell-value {
+  font-size: clamp(16px, 1.25vw, 21px);
+  font-weight: 600;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+.cell-unit { font-size: 12px; color: var(--ink-dim); font-weight: 500; font-family: var(--font-sans); }
+
+.trend {
+  font-size: clamp(11px, 0.85vw, 14px);
+  color: var(--ink-dim);
+  font-weight: 600;
+  margin-left: 6px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.04em;
+}
+.trend.up   { color: var(--safe); }
+.trend.down { color: var(--warning); }
+
+/* ----------------------------------------------------------------------------
+   ATMOSPHERIC CARD
+   ---------------------------------------------------------------------------- */
+.atmo-temp { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.feels { color: var(--ink-dim); font-size: clamp(12px, 0.95vw, 15px); margin-left: 10px; font-weight: 500; }
+
+.atmo-sky { display: flex; align-items: center; gap: 12px; }
+.sky-icon { width: 44px; height: 44px; flex-shrink: 0; }
+.sky-icon svg { display: block; width: 100%; height: 100%; }
+.sky-text { font-size: clamp(14px, 1.1vw, 17px); font-weight: 500; }
+
+/* Visibility cell — state badge next to the label, colour the value when poor/dangerous */
+.vc-state {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-left: 6px;
+}
+.cell.danger {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+.cell.danger .cell-value,
+.cell.danger .vc-state { color: var(--danger); }
+.cell.warning {
+  background: var(--warning-bg);
+  border-color: var(--warning);
+}
+.cell.warning .cell-value,
+.cell.warning .vc-state { color: var(--warning); }
+
+/* ----------------------------------------------------------------------------
+   WIND CARD
+   ---------------------------------------------------------------------------- */
+.wind-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 16px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+.wind-rose-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.wind-rose {
+  /* SVG fits its container via the viewBox + default xMidYMid meet.
+     No CSS aspect-ratio needed; never overflows the card. */
+  width: 100%;
+  height: 100%;
+  max-width: 220px;
+  max-height: 220px;
+  display: block;
+}
+
+.wind-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.wind-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: auto;
+}
+.wind-big { display: flex; align-items: baseline; gap: 4px; flex-wrap: nowrap; }
+.wind-knots {
+  font-size: clamp(13px, 1vw, 16px);
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  line-height: 1.2;
+  margin-top: -2px;
+}
+.wind-knots:empty { display: none; }
+.wind-dir {
+  font-size: clamp(13px, 1vw, 16px);
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.ws-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.ws-k {
+  color: var(--ink-dim);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.ws-v {
+  font-size: clamp(14px, 1.05vw, 18px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* ----------------------------------------------------------------------------
+   SEA CARD
+   ---------------------------------------------------------------------------- */
+.sea-big { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.sea-big .feels { margin-left: 8px; }
+.sea-dir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(13px, 1vw, 15px);
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+.sea-dir-text { color: var(--ink); font-weight: 600; }
+.sea-period { margin-left: auto; }
+.mini-compass { width: 28px; height: 28px; flex-shrink: 0; }
+
+/* ----------------------------------------------------------------------------
+   FORECAST SECTION  — single row, hours then days
+   ---------------------------------------------------------------------------- */
+.hourly-section { display: block; flex-shrink: 0; }
+.hourly-section .card { padding: 10px 16px; gap: 8px; min-height: 150px; }
+
+.forecast-head {
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  margin-bottom: 6px;
+}
+.fh-title {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+/* Two side-by-side sections: NEXT 12 HOURS  |  NEXT 6 DAYS */
+.forecast-row {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 96px;
+}
+.forecast-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.forecast-cells {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+.forecast-divider {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+.fc-cell {
+  background: var(--cell);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  padding: 5px 4px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  position: relative;
+}
+/* daily cells get a slight visual hint to distinguish from hourly cells */
+.fc-cell.daily {
+  background: rgba(255, 255, 255, 0.012);
+  border-color: var(--border);
+}
+.fc-time, .fc-day {
+  color: var(--ink-dim);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.fc-day { color: var(--ink); }   /* day name a touch brighter — easy to scan */
+.fc-icon { display: flex; justify-content: center; align-items: center; height: 24px; }
+.fc-icon svg { width: 24px; height: 24px; }
+.fc-temp { font-size: 15px; font-weight: 700; font-family: var(--font-mono); }
+.fc-temp .fc-tmin {
+  color: var(--ink-dim);
+  font-weight: 500;
+  margin-left: 4px;
+  font-size: 13px;
+}
+.fc-wind {
+  font-size: 11px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+}
+.fc-arrow {
+  display: inline-block;
+  transform-origin: center;
+  color: var(--warning);
+  font-size: 12px;
+  line-height: 1;
+}
+.fc-wave { font-size: 10px; color: var(--info); font-family: var(--font-mono); }
+.fc-rain { font-size: 10px; color: var(--info); }
+.fc-rain.dry { opacity: 0.30; }
+.fc-wind.alert, .fc-wave.alert { color: var(--danger); font-weight: 700; }
+
+/* ----------------------------------------------------------------------------
+   TIDES
+   ---------------------------------------------------------------------------- */
+.tides-section { display: block; min-height: 0; }
+.tides-section .card { gap: 8px; padding: 12px 16px; min-height: 200px; }
+
+.tide-wrap {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+  min-height: 0;
+  flex: 1;
+}
+
+.tide-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  background: var(--cell);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+}
+
+.tide-table {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+.tide-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 64px;
+  gap: 8px;
+  padding: 5px 10px;
+  background: var(--cell);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  align-items: center;
+  font-size: clamp(12px, 0.95vw, 14px);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+.tide-row .lbl {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  font-family: var(--font-sans);
+}
+.tide-row.high .lbl { color: var(--safe); }
+.tide-row.low  .lbl { color: var(--caution); }
+.tide-row.now {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: var(--info);
+}
+.tide-row.now .lbl { color: var(--info); }
+
+/* ----------------------------------------------------------------------------
+   FOOTER
+   ---------------------------------------------------------------------------- */
+.ftr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 26px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 28px;
+  flex-wrap: nowrap;
+  height: 64px;
+  overflow: hidden;
+}
+.ftr-block { display: flex; align-items: center; gap: 10px; }
+.ftr-icon { width: 30px; height: 30px; flex-shrink: 0; }
+.ftr-icon svg { display: block; width: 100%; height: 100%; }
+.moon-icon { width: 30px; height: 30px; flex-shrink: 0; }
+.moon-icon svg { display: block; width: 100%; height: 100%; }
+.ftr-label {
+  color: var(--ink-dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+.ftr-value {
+  font-size: clamp(14px, 1.1vw, 18px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+.ftr-credits {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.beaufort-legend .bf-row { display: flex; gap: 2px; margin-top: 4px; }
+.bf-cell {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0B131D;
+  font-family: var(--font-mono);
+  opacity: 0.32;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.bf-cell.current {
+  opacity: 1;
+  transform: scale(1.18);
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+#bfCurrent { color: var(--ink); font-weight: 700; font-family: var(--font-mono); }
+
+/* ----------------------------------------------------------------------------
+   Smaller screens — gracefully degrade
+   ---------------------------------------------------------------------------- */
+@media (max-width: 1280px) {
+  body { font-size: 15px; }
+  .hourly-grid { grid-template-columns: repeat(8, 1fr); }
+  .h-cell:nth-child(n+9) { display: none; }
+}
+@media (max-width: 1000px) {
+  html { overflow: auto; }
+  body { overflow: auto; height: auto; min-height: 100vh; }
+  .main-grid { grid-template-columns: 1fr 1fr; }
+  #seaCard { grid-column: 1 / -1; }
+  .hourly-grid { grid-template-columns: repeat(6, 1fr); }
+  .h-cell:nth-child(n+7) { display: none; }
+}
+@media (max-width: 680px) {
+  .main-grid { grid-template-columns: 1fr; }
+  #seaCard { grid-column: auto; }
+  .tide-wrap { grid-template-columns: 1fr; }
+  .hourly-grid { grid-template-columns: repeat(4, 1fr); }
+  .h-cell:nth-child(n+5) { display: none; }
+  .hdr { flex-direction: column; align-items: flex-start; height: auto; }
+  .hdr-right { align-items: flex-start; text-align: left; }
+}
