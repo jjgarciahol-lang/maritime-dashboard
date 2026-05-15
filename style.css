@@ -138,7 +138,6 @@ body {
 .hdr-updated.stale::before { content: '⚠ '; }
 
 .theme-toggle {
-  margin-left: auto;
   background: transparent;
   color: var(--ink-dim);
   border: 1px solid var(--border);
@@ -529,23 +528,23 @@ body {
 }
 .fc-time, .fc-day {
   color: var(--ink-dim);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .fc-day { color: var(--ink); }   /* day name a touch brighter — easy to scan */
-.fc-icon { display: flex; justify-content: center; align-items: center; height: 30px; }
-.fc-icon svg { width: 30px; height: 30px; }
-.fc-temp { font-size: 17px; font-weight: 700; font-family: var(--font-mono); }
+.fc-icon { display: flex; justify-content: center; align-items: center; height: 34px; }
+.fc-icon svg { width: 34px; height: 34px; }
+.fc-temp { font-size: 20px; font-weight: 700; font-family: var(--font-mono); }
 .fc-temp .fc-tmin {
   color: var(--ink-dim);
   font-weight: 500;
   margin-left: 4px;
-  font-size: 13px;
+  font-size: 15px;
 }
 .fc-wind {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -557,11 +556,11 @@ body {
   display: inline-block;
   transform-origin: center;
   color: var(--warning);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
 }
-.fc-wave { font-size: 12px; color: var(--info); font-family: var(--font-mono); }
-.fc-rain { font-size: 12px; color: var(--info); }
+.fc-wave { font-size: 14px; color: var(--info); font-family: var(--font-mono); }
+.fc-rain { font-size: 14px; color: var(--info); }
 .fc-rain.dry { opacity: 0.30; }
 .fc-wind.alert, .fc-wave.alert { color: var(--danger); font-weight: 700; }
 
